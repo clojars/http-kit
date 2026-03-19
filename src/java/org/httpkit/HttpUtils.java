@@ -466,9 +466,14 @@ public class HttpUtils {
     }
 
     public static ByteBuffer[] HttpEncode(int status, HeaderMap headers, Object body, String serverHeader, boolean legacyContentLength) {
+        return HttpEncode(HttpStatus.valueOf(status), headers, body, serverHeader, legacyContentLength);
+    }
+    
+    public static ByteBuffer[] HttpEncode(HttpStatus status, HeaderMap headers, Object body, String serverHeader, boolean legacyContentLength) {
         ByteBuffer bodyBuffer;
         try {
             bodyBuffer = bodyBuffer(body);
+            final int statusCode = status.getCode();
             // only write length if not chunked
             if (!CHUNKED.equals(headers.get("Transfer-Encoding"))) {
                 if (legacyContentLength) {
@@ -476,7 +481,7 @@ public class HttpUtils {
                     if (bodyBuffer != null) {
                         // trust the computed length
                         headers.putOrReplace(CONTENT_LENGTH, Integer.toString(bodyBuffer.remaining()));
-                    } else if ((status / 100) != 1 && status != 204) {
+                    } else if ((statusCode / 100) != 1 && statusCode != 204) {
                         headers.putOrReplace(CONTENT_LENGTH, "0");
                     }
                 } else {
@@ -486,7 +491,7 @@ public class HttpUtils {
                         // No user-provided Content-Length, calculate it
                         if (bodyBuffer != null) {
                             headers.putOrReplace(CONTENT_LENGTH, Integer.toString(bodyBuffer.remaining()));
-                        } else if ((status / 100) != 1 && status != 204) {
+                        } else if ((statusCode / 100) != 1 && statusCode != 204) {
                             headers.putOrReplace(CONTENT_LENGTH, "0");
                         }
                     }
@@ -494,7 +499,7 @@ public class HttpUtils {
             }
         } catch (IOException e) {
             byte[] b = e.getMessage().getBytes(ASCII);
-            status = 500;
+            status = HttpStatus.INTERNAL_SERVER_ERROR;
             headers.clear();
             headers.put(CONTENT_LENGTH, Integer.toString(b.length));
             bodyBuffer = ByteBuffer.wrap(b);
@@ -506,7 +511,7 @@ public class HttpUtils {
           headers.put("Date", DateFormatter.getDate()); // rfc says the Date is needed
         }
         DynamicBytes bytes = new DynamicBytes(196);
-        byte[] bs = HttpStatus.valueOf(status).getInitialLineBytes();
+        byte[] bs = status.getInitialLineBytes();
         bytes.append(bs, bs.length);
         headers.encodeHeaders(bytes);
         ByteBuffer headBuffer = ByteBuffer.wrap(bytes.get(), 0, bytes.length());

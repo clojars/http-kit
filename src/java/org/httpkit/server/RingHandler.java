@@ -6,6 +6,7 @@ import static org.httpkit.HttpVersion.HTTP_1_0;
 import static org.httpkit.HttpVersion.HTTP_1_1;
 import static org.httpkit.server.ClojureRing.BODY;
 import static org.httpkit.server.ClojureRing.HEADERS;
+import static org.httpkit.server.ClojureRing.STATUS_MESSAGE;
 import static org.httpkit.server.ClojureRing.buildRequestMap;
 import static org.httpkit.server.ClojureRing.getStatus;
 
@@ -20,6 +21,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.httpkit.HeaderMap;
+import org.httpkit.HttpStatus;
 import org.httpkit.PrefixThreadFactory;
 import org.httpkit.logger.ContextLogger;
 import org.httpkit.logger.EventNames;
@@ -59,6 +61,7 @@ class ClojureRing {
     static final Keyword HTTP = intern("http");
 
     static final Keyword STATUS = intern("status");
+    static final Keyword STATUS_MESSAGE = intern("status-message");
 
     public static int getStatus(Map<Keyword, Object> resp) {
         int status = 200;
@@ -186,8 +189,12 @@ class HttpHandler implements Runnable {
                 } else if (req.version == HTTP_1_1 && !req.isKeepAlive) {
                     headers.put("Connection", "Close");
                 }
+
+                final String statusMessage = (String)resp.get(STATUS_MESSAGE);
                 final int status = getStatus(resp);
-                cb.run(HttpEncode(status, headers, body, this.serverHeader, this.legacyContentLength));
+                cb.run(statusMessage != null ?
+                       HttpEncode(new HttpStatus(status, statusMessage), headers, body, this.serverHeader, this.legacyContentLength) :
+                       HttpEncode(status, headers, body, this.serverHeader, this.legacyContentLength));
                 eventLogger.log(eventNames.serverStatusPrefix + status);
             }
         }
