@@ -1,8 +1,8 @@
-(defproject net.clojars.internal/http-kit "2.9.0-beta3-clojars-01"
+(defproject net.clojars.internal/http-kit "2.9.0-beta3-clojars-03"
   :author "Feng Shen (@shenfeng) and contributors"
   :description "Simple, high-performance event-driven HTTP client+server for Clojure"
-  :url "https://github.com/http-kit/http-kit"
-
+  :url "https://github.com/clojars/http-kit"
+  :scm {:url "https://github.com/clojars/http-kit"}
   :license
   {:name "Apache License, Version 2.0"
    :url  "https://www.apache.org/licenses/LICENSE-2.0.html"}

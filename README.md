@@ -4,6 +4,12 @@
 [![Main tests][Main tests SVG]][Main tests URL]
 [![Graal tests][Graal tests SVG]][Graal tests URL]
 
+> [!NOTE]
+> This is a fork of [http-kit](https://github.com/http-kit/http-kit) that adds [support for custom status messages](https://github.com/clojars/http-kit/commit/4071c4ab80424d265bbcb606e42942813b606d64). Clojars uses these to signal reasons for deploy failure, but they are deprecated, and aren't part of the ring spec. Clojars plans to stop using them once [problem details](https://github.com/clojars/clojars-web/issues/911) support is added and has propagated to tooling.
+> 
+> This fork is deployed to Clojars as [`net.clojars.internal/http-kit`](https://clojars.org/net.clojars.internal/http-kit).
+
+
 # http-kit
 
 ### Simple, high-performance event-driven HTTP client+server for Clojure
